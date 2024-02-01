@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_app/business%20logic/cubit/home_cubit.dart';
+import 'package:movie_app/business%20logic/cubit/home_state.dart';
 import 'package:movie_app/presentation/menu_page.dart';
 import 'package:movie_app/presentation/movie_page.dart';
 
@@ -10,34 +13,49 @@ class HomePage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color.fromRGBO(10, 7, 30, 1),
-        body: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Center(child: Image.asset('assets/images/Rectangle 186.png')),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30 , vertical: 40),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: ( (context) => MenuPage() )));
-                      },
-                      child: Image.asset('assets/images/Vector.png')),
-                    Spacer(),
-                    Image.asset('assets/images/Ellipse 491.png'),
-                  ],
-                ),
-              ),
-        
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 300,
+        body: BlocProvider(
+          create: (_) => HomeCubit()..getHome(),
+          child: BlocConsumer<HomeCubit, HomeState>(
+            listener: (context, state) {
+              if(state is HomeIsLoading){
+              Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            },
+            builder: (context, state) {
+              return SingleChildScrollView(
+            child: Stack(
+              children: [
+                state is HomeIsLoading ? CircularProgressIndicator() :
+                Center(child: Image.asset(HomeCubit.get(context).homeModel!.results![0].posterPath!.toString())),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                  child: Row(
+                    children: [
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => MenuPage())));
+                          },
+                          child: Image.asset('assets/images/Vector.png')),
+                      Spacer(),
+                      Image.asset('assets/images/Ellipse 491.png'),
+                    ],
                   ),
-                  Center(
-                    child: Image.asset('assets/images/movie+.png'),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 300,
+                    ),
+                    Center(
+                      child: Image.asset('assets/images/movie+.png'),
                     ),
                     SizedBox(
                       height: 10,
@@ -46,22 +64,30 @@ class HomePage extends StatelessWidget {
                     SizedBox(
                       height: 30,
                     ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Center(
-                      child: Text('Para maratonear' , style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
+                      
+                      child: Text(
+                        
+                        HomeCubit.get(context).homeModel!.results![0].originalTitle!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Center(
-                      child: Text('Lorem ipsum dolor sit amet consectetur. Eget \n dictum est penatibus eget nunc. Enim \n pellentesque venenatis enim.' , style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
+                      child: Text(
+                        HomeCubit.get(context).homeModel!.results![0].overview!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -93,40 +119,46 @@ class HomePage extends StatelessWidget {
                         Image.asset('assets/images/Ellipse 489.png'),
                       ],
                     ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text('Mi lista' , style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
-                          ),
-                    ),
-                        SizedBox(
-                          height: 10,
+                      child: Text(
+                        HomeCubit.get(context).homeModel!.results![0].title!,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: SizedBox(
-                            height: 180,
-                            child: ListView.builder(
-                              itemCount: 10,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: ( (context, index) {
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: SizedBox(
+                        height: 180,
+                        child: ListView.builder(
+                            itemCount: HomeCubit.get(context).homeModel!.results![0].posterPath!.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: ((context, index) {
                               return CustomWidgetColumn();
                             })),
-                          ),
-                        ),
+                      ),
+                    ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text('Solo en Movie+' , style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
+                      child: Text(
+                        HomeCubit.get(context).homeModel!.results![0].title!,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -137,22 +169,25 @@ class HomePage extends StatelessWidget {
                       child: SizedBox(
                         height: 250,
                         child: ListView.builder(
-                          itemCount: 10,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: ( (context, index) {
-                          return CustomWidgetContainer();
-                        })),
+                            itemCount: HomeCubit.get(context).homeModel!.results![0].posterPath!.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: ((context, index) {
+                              return CustomWidgetContainer();
+                            })),
                       ),
                     ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text('Nuevos estrenos' , style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
+                      child: Text(
+                        HomeCubit.get(context).homeModel!.results![0].title!,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -163,22 +198,25 @@ class HomePage extends StatelessWidget {
                       child: SizedBox(
                         height: 160,
                         child: ListView.builder(
-                          itemCount: 10,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: ( (context, index) {
-                          return CustomWidgetImage();
-                        })),
+                            itemCount: HomeCubit.get(context).homeModel!.results![0].posterPath!.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: ((context, index) {
+                              return CustomWidgetImage();
+                            })),
                       ),
                     ),
+                    state is HomeIsLoading ? CircularProgressIndicator() :
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text('Peliculas Top' , style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
+                      child: Text(
+                        HomeCubit.get(context).homeModel!.results![0].title!,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -189,20 +227,21 @@ class HomePage extends StatelessWidget {
                       child: SizedBox(
                         height: 300,
                         child: ListView.builder(
-                          itemCount: 10,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: ( (context, index) {
-                          return CustomWidgetRow();
-                        })),
+                            itemCount: HomeCubit.get(context).homeModel!.results![0].posterPath!.length,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: ((context, index) {
+                              return CustomWidgetRow();
+                            })),
                       ),
                     )
-                    
-                ],
-              ),
-              
-            ],
-          ),
+                  ],
+                ),
+              ],
+            ),
+          );
+            },
+          )
         ),
       ),
     );
@@ -220,7 +259,8 @@ class CustomWidgetRow extends StatelessWidget {
       padding: const EdgeInsets.only(right: 20),
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: ( (context) => MoviePage(images: ''))));
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => MoviePage(images: ''))));
         },
         child: Column(
           children: [
@@ -243,7 +283,8 @@ class CustomWidgetImage extends StatelessWidget {
       padding: const EdgeInsets.only(right: 20),
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: ( (context) => MoviePage(images: ''))));
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => MoviePage(images: ''))));
         },
         child: Column(
           children: [
@@ -266,7 +307,8 @@ class CustomWidgetContainer extends StatelessWidget {
       padding: const EdgeInsets.only(right: 20),
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: ( (context) => MoviePage(images: ''))));
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => MoviePage(images: ''))));
         },
         child: Column(
           children: [
@@ -289,7 +331,8 @@ class CustomWidgetColumn extends StatelessWidget {
       padding: const EdgeInsets.only(right: 20),
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: ( (context) => MoviePage(images: '') )));
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => MoviePage(images: ''))));
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,12 +341,15 @@ class CustomWidgetColumn extends StatelessWidget {
             SizedBox(
               height: 10,
             ),
-            Text('Los miserables' , style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
-              fontFamily: 'Poppins',
-            ),)
+            Text(
+              'Los miserables',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+                fontFamily: 'Poppins',
+              ),
+            )
           ],
         ),
       ),

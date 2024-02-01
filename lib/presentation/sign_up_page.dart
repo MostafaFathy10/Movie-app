@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:movie_app/presentation/custom_snackbar.dart';
+import 'package:movie_app/presentation/home_page.dart';
 import 'package:movie_app/presentation/sign_in_page.dart';
 import 'package:movie_app/presentation/splash_screen.dart';
 
@@ -43,6 +45,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   ),
                   TextField(
+                    onChanged: (value) {
+                    email = value;
+                  },
                     decoration: InputDecoration(
                       label: Text('Email' , style: TextStyle(
                         fontSize: 16,
@@ -67,6 +72,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: 30,
                   ),
                   TextField(
+                    obscureText: true,
+                  onChanged: (value) {
+                    password = value;
+                  },
                     decoration: InputDecoration(
                       label: Text('Password' , style: TextStyle(
                         fontSize: 16,
@@ -95,6 +104,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: 30,
                   ),
                   TextField(
+                    obscureText: true,
+                  onChanged: (value) {
+                    confirmPassword = value;
+                  },
                     decoration: InputDecoration(
                       label: Text('Confirm Password' , style: TextStyle(
                         fontSize: 16,
@@ -152,8 +165,25 @@ class _SignUpPageState extends State<SignUpPage> {
                         backgroundColor: MaterialStatePropertyAll(Color.fromRGBO(137, 42, 236, 1)),
                         foregroundColor: MaterialStatePropertyAll(Colors.white),
                       ),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: ( (context) => SignInPage())));
+                      onPressed: ()async {
+                        if(formKey.currentState!.validate()){
+                          isLoading = true;
+
+                          setState(() {});
+                          try{
+                            await loginUser();
+                            ShowSnackBar(context, 'Account created');
+                            
+                          } on FirebaseException catch(ex){
+                            if(ex == 'No account created'){
+                              ShowSnackBar(context, 'No account created');
+                            }
+                          }
+                          isLoading = false;
+                          setState(() {});
+                          Navigator.push(context, MaterialPageRoute(builder: ( (context) => HomePage())));
+                        }
+                         
                       } , child: Text('Create account' , style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -170,4 +200,15 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+  Future<void> loginUser() async {
+  var FirebaseAuth;
+  UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email! , password: password!);
 }
+}
+GlobalKey<FormState> formKey = GlobalKey();
+  String? email;
+  String? password;
+  
+  
+  String? confirmPassword;
+  bool isLoading = false;
